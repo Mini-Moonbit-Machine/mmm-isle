@@ -1,0 +1,7 @@
+[workspace]
+members = ["isle", "islec"]
+resolver = "2"
+
+[workspace.package]
+rust-version = "1.78.0"
+edition = "2021"
