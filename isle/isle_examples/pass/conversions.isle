@@ -1,7 +1,7 @@
 (type T (enum (A) (B)))
 (type U (enum (C) (D)))
 (type V (enum (E) (F)))
-(type u32 (primitive u32))
+(type u32 (primitive UInt))
 
 (convert T U t_to_u)
 (convert U T u_to_t)
@@ -21,7 +21,7 @@
 (rule (u_to_v (U.D)) (V.F))
 
 (extern extractor u_to_t u_to_t)
-      
+
 
 (decl X (T U) V)
 (rule (X (U.C) (U.D))

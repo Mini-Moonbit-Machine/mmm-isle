@@ -1,5 +1,5 @@
-(type u32 (primitive u32))
-(type bool (primitive bool))
+(type u32 (primitive UInt))
+(type bool (primitive Bool))
 (type A (enum (A1 (x u32))))
 
 (decl Ext1 (u32) A)

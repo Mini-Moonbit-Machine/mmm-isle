@@ -1,4 +1,4 @@
-(type i32 (primitive i32))
+(type i32 (primitive UInt))
 
 (type B (enum (B (x i32) (y i32))))
 

@@ -1,4 +1,4 @@
-(type u32 (primitive u32))
+(type u32 (primitive UInt))
 
 (decl pure partial A (u32 u32) u32)
 (extern constructor A A)

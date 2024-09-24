@@ -1,7 +1,7 @@
 ;;;; Type Definitions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Declare that we are using the `i32` primitive type from Rust.
-(type i32 (primitive i32))
+(type i32 (primitive UInt))
 
 ;; Our high-level, RISC-y input IR.
 (type HighLevelInst

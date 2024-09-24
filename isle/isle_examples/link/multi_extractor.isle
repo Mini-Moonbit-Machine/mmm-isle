@@ -1,4 +1,4 @@
-(type u32 (primitive u32))
+(type u32 (primitive UInt))
 (type A extern (enum (B) (C)))
 
 (decl multi E1 (A u32) u32)
