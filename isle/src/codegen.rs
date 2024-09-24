@@ -530,15 +530,12 @@ let _MAX_ISLE_RETURNS = 64
                             write!(ctx.out, "{}while true", &ctx.indent,)?;
                             ctx.begin_block()?;
                             // A ugly hack because moonbit doesn't support while let syntax.
-                            write!(
+                            writeln!(
                                 ctx.out,
-                                "{}let v{} = match (v{}._.next)(ctx) {{\n{}    Some(x) => x\n{}    None => break\n{}}};\n",
+                                "{}let v{} = match (v{}._.next)(ctx) {{ Some(x) => x; None => break }};",
                                 &ctx.indent,
                                 result.index(),
                                 source.index(),
-                                &ctx.indent,
-                                &ctx.indent,
-                                &ctx.indent
                             )?;
                             ctx.is_bound.insert(*result);
                             stack.push((Self::validate_block(ret_kind, body), "", scope));
@@ -683,6 +680,11 @@ let _MAX_ISLE_RETURNS = 64
                 self.emit_expr(ctx, inner)?;
                 write!(ctx.out, ")")
             }
+            &Binding::MatchSome { source } => {
+                write!(ctx.out, "match ")?;
+                self.emit_expr(ctx, source)?;
+                write!(ctx.out, " {{ Some(x) => x; None => return None }}")
+            }
             &Binding::MatchTuple { source, field } => {
                 self.emit_expr(ctx, source)?;
                 write!(ctx.out, ".{}", field.index())
@@ -690,10 +692,6 @@ let _MAX_ISLE_RETURNS = 64
 
             // These are not supposed to happen. If they do, make the generated code fail to compile
             // so this is easier to debug than if we panic during codegen.
-            &Binding::MatchSome { source } => {
-                self.emit_expr(ctx, source)?;
-                write!(ctx.out, "? /*FIXME*/")
-            }
             &Binding::MatchVariant { source, field, .. } => {
                 self.emit_expr(ctx, source)?;
                 write!(ctx.out, ".{} /*FIXME*/", field.index())
