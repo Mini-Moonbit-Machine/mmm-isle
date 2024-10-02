@@ -137,6 +137,25 @@ impl<'src> Lexer<'src> {
                 self.advance_pos();
                 Ok(Some((char_pos, Token::At)))
             }
+            b'`' => {
+                self.advance_pos();
+                let start = self.pos.offset;
+                let start_pos = self.pos();
+                while let Some(c) = self.peek_byte() {
+                    match c {
+                        b'`' => {
+                            self.advance_pos();
+                            break;
+                        }
+                        c if c.is_ascii_whitespace() || c == b'\n' => break,
+                        _ => self.advance_pos(),
+                    }
+                }
+                let end = self.pos.offset - 1;
+                let s = &self.src[start..end];
+                debug_assert!(!s.is_empty());
+                Ok(Some((start_pos, Token::Symbol(s.to_string()))))
+            }
             c if is_sym_first_char(c) => {
                 let start = self.pos.offset;
                 let start_pos = self.pos();

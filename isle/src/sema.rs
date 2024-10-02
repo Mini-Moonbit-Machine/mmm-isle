@@ -95,6 +95,8 @@ pub enum Type {
     Enum {
         /// The name of this enum.
         name: Sym,
+        /// The name of this enum when exported to target code
+        export_name: Option<Sym>,
         /// This `enum`'s type id.
         id: TypeId,
         /// Is this `enum` defined in external Rust code?
@@ -1000,12 +1002,12 @@ impl TypeEnv {
                 }
                 Some(Type::Primitive(tid, self.intern_mut(id), ty.pos))
             }
-            &ast::TypeValue::Enum(ref ty_variants, ..) => {
+            &ast::TypeValue::Enum(ref export_name, ref ty_variants, ..) => {
                 if ty.is_extern && ty.is_nodebug {
                     self.report_error(ty.pos, "external types cannot be marked `nodebug`");
                     return None;
                 }
-
+                let expname = export_name.as_ref().map(|x| self.intern_mut(x));
                 let mut variants = vec![];
                 for variant in ty_variants {
                     let combined_ident =
@@ -1061,6 +1063,7 @@ impl TypeEnv {
                 }
                 Some(Type::Enum {
                     name,
+                    export_name: expname,
                     id: tid,
                     is_extern: ty.is_extern,
                     is_nodebug: ty.is_nodebug,

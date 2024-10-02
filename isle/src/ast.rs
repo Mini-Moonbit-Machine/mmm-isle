@@ -43,7 +43,7 @@ pub struct Type {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum TypeValue {
     Primitive(Ident, Pos),
-    Enum(Vec<Variant>, Pos),
+    Enum(Option<Ident>, Vec<Variant>, Pos),
 }
 
 /// One variant of an enum type.

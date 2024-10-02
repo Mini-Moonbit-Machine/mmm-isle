@@ -164,19 +164,19 @@ impl<'a> Parser<'a> {
             .chars()
             .next()
             .ok_or_else(|| self.error(pos, "empty symbol".into()))?;
-        if !first.is_alphabetic() && first != '_' && first != '$' {
+        if !first.is_alphabetic() && first != '_' && first != '$' && first != '@' {
             return Err(self.error(
                 pos,
-                format!("Identifier '{s}' does not start with letter or _ or $"),
+                format!("Identifier '{s}' does not start with letter or _ or $ or @"),
             ));
         }
         if s.chars()
             .skip(1)
-            .any(|c| !c.is_alphanumeric() && c != '_' && c != '.' && c != '$')
+            .any(|c| !(c.is_alphanumeric() || c.is_ascii_punctuation()))
         {
             return Err(self.error(
                 pos,
-                format!("Identifier '{s}' contains invalid character (not a-z, A-Z, 0-9, _, ., $)"),
+                format!("Identifier '{s}' contains invalid character (not a-z, A-Z, 0-9, or punctuations)"),
             ));
         }
         Ok(Ident(s.to_string(), pos))
@@ -247,13 +247,18 @@ impl<'a> Parser<'a> {
             self.expect_rparen()?;
             Ok(TypeValue::Primitive(primitive_ident, pos))
         } else if self.eat_sym_str("enum")? {
+            let export_name = if self.eat_sym_str("as")? {
+                Some(self.parse_ident()?)
+            } else {
+                None
+            };
             let mut variants = vec![];
             while !self.is_rparen() {
                 let variant = self.parse_type_variant()?;
                 variants.push(variant);
             }
             self.expect_rparen()?;
-            Ok(TypeValue::Enum(variants, pos))
+            Ok(TypeValue::Enum(export_name, variants, pos))
         } else {
             Err(self.error(pos, "Unknown type definition".to_string()))
         }

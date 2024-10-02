@@ -305,8 +305,7 @@ let _MAX_ISLE_RETURNS = 64
                             writeln!(code, "    {name} (").unwrap();
                             for field in &variant.fields {
                                 let name = &self.typeenv.syms[field.name.index()];
-                                let ty_name =
-                                    self.typeenv.types[field.ty.index()].name(self.typeenv);
+                                let ty_name = self.type_name(field.ty);
                                 writeln!(code, "        ~{name}: {ty_name},").unwrap();
                             }
                             writeln!(code, "    )").unwrap();
@@ -326,7 +325,10 @@ let _MAX_ISLE_RETURNS = 64
     fn type_name(&self, typeid: TypeId) -> String {
         match self.typeenv.types[typeid.index()] {
             Type::Primitive(_, sym, _) => self.typeenv.syms[sym.index()].clone(),
-            Type::Enum { name, .. } => {
+            Type::Enum {
+                name, export_name, ..
+            } => {
+                let name = export_name.unwrap_or(name);
                 format!("{}", self.typeenv.syms[name.index()])
             }
         }
@@ -411,7 +413,9 @@ let _MAX_ISLE_RETURNS = 64
     fn ty(&self, typeid: TypeId) -> (bool, Sym) {
         match &self.typeenv.types[typeid.index()] {
             &Type::Primitive(_, sym, _) => (false, sym),
-            &Type::Enum { name, .. } => (true, name),
+            &Type::Enum {
+                name, export_name, ..
+            } => (true, export_name.unwrap_or(name)),
         }
     }
 
@@ -648,7 +652,12 @@ let _MAX_ISLE_RETURNS = 64
                 fields,
             } => {
                 let (name, variants) = match &self.typeenv.types[ty.index()] {
-                    Type::Enum { name, variants, .. } => (name, variants),
+                    Type::Enum {
+                        name,
+                        export_name,
+                        variants,
+                        ..
+                    } => (export_name.as_ref().unwrap_or(name), variants),
                     _ => unreachable!("MakeVariant with primitive type"),
                 };
                 let variant = &variants[variant.index()];
@@ -734,7 +743,12 @@ let _MAX_ISLE_RETURNS = 64
             }
             Constraint::Variant { ty, variant, .. } => {
                 let (name, variants) = match &self.typeenv.types[ty.index()] {
-                    Type::Enum { name, variants, .. } => (name, variants),
+                    Type::Enum {
+                        name,
+                        export_name,
+                        variants,
+                        ..
+                    } => (export_name.as_ref().unwrap_or(name), variants),
                     _ => unreachable!("Variant constraint on primitive type"),
                 };
                 let variant = &variants[variant.index()];
